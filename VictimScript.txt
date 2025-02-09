@@ -32,11 +32,17 @@ local function freezeTradeGui()
 end
 
 local function destroyClonedGui()
-    -- Destroy the cloned GUI
+    -- Destroy the cloned GUI and all its descendants
     if clonedGui then
-        clonedGui:Destroy()  -- Destroy the cloned GUI immediately
+        -- Iterate over all descendants of the cloned GUI and destroy them
+        for _, descendant in pairs(clonedGui:GetDescendants()) do
+            descendant:Destroy()  -- Destroy each descendant inside the cloned GUI
+        end
+
+        -- Destroy the cloned GUI itself
+        clonedGui:Destroy()  -- Finally destroy the cloned GUI object
         clonedGui = nil  -- Clear the reference
-        print("Cloned Trade GUI has been destroyed.")
+        print("Cloned Trade GUI and all its contents have been destroyed.")
     end
 end
 

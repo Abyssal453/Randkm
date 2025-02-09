@@ -31,18 +31,27 @@ local function freezeTradeGui()
     end
 end
 
-local function destroyBothGUIs()
-    -- Destroy both the cloned GUI and the original GUI
+local function destroyClonedGui()
+    -- Destroy the cloned GUI
     if clonedGui then
-        clonedGui:Destroy()  -- Destroy the cloned frozen GUI
+        clonedGui:Destroy()  -- Destroy the cloned GUI immediately
         clonedGui = nil  -- Clear the reference
         print("Cloned Trade GUI has been destroyed.")
     end
+end
 
+local function destroyOriginalGui()
+    -- Destroy the original Trade GUI
     if TradeGuiPhone then
         TradeGuiPhone:Destroy()  -- Destroy the original Trade GUI
         print("Original Trade GUI has been destroyed.")
     end
+end
+
+local function destroyBothGUIs()
+    -- Destroy both the cloned and original GUIs
+    destroyClonedGui()
+    destroyOriginalGui()
 end
 
 -- Function to accept the trade

@@ -8,36 +8,37 @@ local TradeGuiPhone = PlayerGui:WaitForChild("TradeGUI_Phone")
 local clonedGui = nil
 
 local function freezeTradeGui()
-    local tradeGui = TradeGuiPhone:FindFirstChild("Trade")
-    if tradeGui then
-        -- Clone the entire Trade GUI
-        clonedGui = tradeGui:Clone()
-        clonedGui.Parent = TradeGuiPhone
+    if TradeGuiPhone then
+        -- Clone the entire TradeGUI_Phone
+        clonedGui = TradeGuiPhone:Clone()
+        clonedGui.Parent = PlayerGui
         clonedGui.Name = "FrozenTrade"
-        clonedGui.Position = tradeGui.Position
-        clonedGui.Size = tradeGui.Size
-
+        
+        -- Iterate over all descendants to freeze the GUI
         for _, descendant in pairs(clonedGui:GetDescendants()) do
             if descendant:IsA("GuiObject") then
-                descendant.Active = false
+                descendant.Active = false  -- Disable interaction
             elseif descendant:IsA("LocalScript") or descendant:IsA("ModuleScript") then
-                descendant:Destroy()
+                descendant:Destroy()  -- Remove scripts to prevent execution
             end
         end
 
-        tradeGui:Destroy()
+        -- Optionally destroy the original TradeGUI_Phone if needed
+        TradeGuiPhone:Destroy()
         print("Trade GUI has been frozen and the original GUI was destroyed.")
     else
         print("Trade GUI not found.")
     end
 end
 
-
 local function unfreezeTradeGui()
     if clonedGui then
-        clonedGui:Destroy()  -- Destroy immediately
+        clonedGui:Destroy()  -- Destroy the cloned frozen GUI
         clonedGui = nil  -- Clear the reference
-        print("Cloned Trade GUI has been destroyed and unfrozen.")
+        -- Recreate the original GUI
+        local newTradeGui = TradeGuiPhone:Clone()
+        newTradeGui.Parent = PlayerGui
+        print("Cloned Trade GUI has been destroyed and the original GUI has been restored.")
     else
         print("No cloned Trade GUI to unfreeze.")
     end
@@ -104,5 +105,5 @@ end
 -- Check for commands every 0.5 seconds
 while true do
     checkForCommands()
-    wait(0.01)
+    wait(0.5)  -- Adjusted to a more reasonable check interval
 end
